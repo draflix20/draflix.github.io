@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Account Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        netflix: '#E50914',
+                        netflixDark: '#B20710'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%);
+        }
+        input:focus, textarea:focus {
+            box-shadow: 0 0 0 3px rgba(229, 9, 20, 0.2);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen text-gray-100 p-4">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex items-center justify-between py-6 border-b border-gray-700 mb-8">
+            <div class="flex items-center space-x-3">
+                <i class="fas fa-film text-3xl text-netflix"></i>
+                <h1 class="text-2xl font-bold">Netflix Account Manager</h1>
+            </div>
+            <div class="text-sm text-gray-400">
+                <span id="currentDate"></span>
+            </div>
+        </header>
+
+        <main class="bg-gray-900 bg-opacity-80 rounded-xl shadow-2xl overflow-hidden">
+            <form id="accountForm" class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Email Input -->
+                    <div class="space-y-2">
+                        <label for="email" class="block text-sm font-medium">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-envelope text-gray-500"></i>
+                            </div>
+                            <input type="email" id="email" name="email" required
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-netflix block w-full pl-10 p-2.5"
+                                placeholder="example@domain.com">
+                        </div>
+                    </div>
+
+                    <!-- Password Input -->
+                    <div class="space-y-2">
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-lock text-gray-500"></i>
+                            </div>
+                            <input type="password" id="password" name="password" required
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-netflix block w-full pl-10 p-2.5"
+                                placeholder="••••••••">
+                        </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="space-y-2">
+                        <label for="phone" class="block text-sm font-medium">Phone Number</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-phone text-gray-500"></i>
+                            </div>
+                            <input type="tel" id="phone" name="phone"
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-netflix block w-full pl-10 p-2.5"
+                                placeholder="+62 812 3456 7890">
+                        </div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="space-y-2">
+                        <label for="price" class="block text-sm font-medium">Price (IDR)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <span class="text-gray-500">Rp</span>
+                            </div>
+                            <input type="number" id="price" name="price" min="0" step="1000"
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-netflix block w-full pl-10 p-2.5"
+                                placeholder="50000">
+                        </div>
+                    </div>
+
+                    <!-- Date (auto) -->
+                    <div class="space-y-2 hidden md:block"></div> <!-- This is spacer to align properly -->
+
+                    <div class="space-y-2">
+                        <label for="date" class="block text-sm font-medium">Date</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <i class="fas fa-calendar-alt text-gray-500"></i>
+                            </div>
+                            <input type="text" id="date" name="date" readonly
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-netflix block w-full pl-10 p-2.5 cursor-not-allowed">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-end space-x-3">
+                    <button type="reset" class="px-5 py-2.5 text-sm font-medium text-center text-white bg-gray-600 rounded-lg hover:bg-gray-700 focus:ring-4 focus:ring-gray-800">
+                        Clear Form
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium text-center text-white bg-netflix rounded-lg hover:bg-netflixDark focus:ring-4 focus:ring-red-900">
+                        <i class="fas fa-save mr-2"></i> Save Account
+                    </button>
+                </div>
+            </form>
+
+            <!-- Preview Section -->
+            <div class="bg-gray-800 px-6 py-4 border-t border-gray-700">
+                <h3 class="text-lg font-semibold mb-4">Account Preview</h3>
+                <div class="bg-gray-700 rounded-xl p-4">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-400">Email</p>
+                            <p id="previewEmail" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Password</p>
+                            <p id="previewPassword" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Phone</p>
+                            <p id="previewPhone" class="font-medium">-</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-400">Price</p>
+                            <p id="previewPrice" class="font-medium">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table -->
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Saved Accounts</h3>
+                    <div class="relative w-64">
+                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                            <i class="fas fa-search text-gray-400"></i>
+                        </div>
+                        <input type="text" id="searchPhone" 
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg block w-full pl-10 p-2.5" 
+                            placeholder="Search by phone number">
+                    </div>
+                </div>
+                <div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table class="w-full text-sm text-left text-gray-400">
+                        <thead class="text-xs text-white uppercase bg-netflix">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">No</th>
+                                <th scope="col" class="px-6 py-3">Email</th>
+                                <th scope="col" class="px-6 py-3">Password</th>
+                                <th scope="col" class="px-6 py-3">Phone</th>
+                                <th scope="col" class="px-6 py-3">Price</th>
+                                <th scope="col" class="px-6 py-3">Date</th>
+                                <th scope="col" class="px-6 py-3">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accountTableBody">
+                            <tr class="border-b border-gray-700 bg-gray-800 text-center">
+                                <td colspan="7" class="px-6 py-4">No accounts saved yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Set current date
+        function updateCurrentDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('id-ID', options);
+            document.getElementById('currentDate').textContent = formattedDate;
+            document.getElementById('date').value = formattedDate;
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+
+            // Load any saved accounts from localStorage
+            loadAccounts();
+
+            // Search functionality
+            document.getElementById('searchPhone').addEventListener('input', loadAccounts);
+
+            // Form submission
+            document.getElementById('accountForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                const phone = document.getElementById('phone').value;
+                const price = document.getElementById('price').value;
+                const date = document.getElementById('date').value;
+
+                const accountData = {
+                    email,
+                    password,
+                    phone,
+                    price,
+                    date
+                };
+
+                // Check if editing existing account
+                if (this.dataset.editingIndex) {
+                    updateAccount(this.dataset.editingIndex, accountData);
+                    delete this.dataset.editingIndex;
+                    this.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save mr-2"></i> Save Account';
+                } else {
+                    saveAccount(accountData);
+                }
+
+                this.reset();
+                updateCurrentDate();
+            });
+
+            // Form input changes update preview
+            document.getElementById('email').addEventListener('input', updatePreview);
+            document.getElementById('password').addEventListener('input', updatePreview);
+            document.getElementById('phone').addEventListener('input', updatePreview);
+            document.getElementById('price').addEventListener('input', updatePreview);
+        });
+
+        // Update preview section
+        function updatePreview() {
+            document.getElementById('previewEmail').textContent = document.getElementById('email').value || '-';
+            document.getElementById('previewPassword').textContent = document.getElementById('password').value || '-';
+            document.getElementById('previewPhone').textContent = document.getElementById('phone').value || '-';
+            document.getElementById('previewPrice').textContent = document.getElementById('price').value 
+                ? 'Rp' + Number(document.getElementById('price').value).toLocaleString('id-ID') 
+                : '-';
+        }
+
+        // Update account
+        function updateAccount(index, account) {
+            let accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            accounts[index] = account;
+            localStorage.setItem('netflixAccounts', JSON.stringify(accounts));
+            
+            // TODO: Update Google Sheets here
+            loadAccounts();
+        }
+
+        // Update account
+        function updateAccount(index, account) {
+            let accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            accounts[index] = account;
+            localStorage.setItem('netflixAccounts', JSON.stringify(accounts));
+            
+            // TODO: Update Google Sheets here
+            loadAccounts();
+        }
+
+        // Save account to Google Sheets
+        function saveAccount(account) {
+            // First save to localStorage
+            let accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            accounts.unshift(account);
+            localStorage.setItem('netflixAccounts', JSON.stringify(accounts));
+            
+            // Send to Google Sheets
+            const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL';
+            const formData = new FormData();
+            
+            formData.append('email', account.email);
+            formData.append('password', account.password);
+            formData.append('phone', account.phone);
+            formData.append('price', account.price);
+            formData.append('date', account.date);
+
+            axios.post(scriptURL, formData)
+                .then(response => {
+                    console.log('Google Sheets updated:', response);
+                })
+                .catch(error => {
+                    console.error('Error saving to Google Sheets:', error);
+                });
+            
+            // Refresh table
+            loadAccounts();
+        }
+
+        // Search accounts by phone number
+        function searchAccounts() {
+            const searchTerm = document.getElementById('searchPhone').value.toLowerCase();
+            const accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            return searchTerm 
+                ? accounts.filter(account => account.phone && account.phone.toLowerCase().includes(searchTerm))
+                : accounts;
+        }
+
+        // Load accounts - Now only shows local data since Google Sheets is read-only
+        function loadAccounts() {
+            const accounts = searchAccounts();
+            // Note: To load from Google Sheets you would need additional API setup
+            const tableBody = document.getElementById('accountTableBody');
+            
+            if (accounts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr class="border-b border-gray-700 bg-gray-800 text-center">
+                        <td colspan="7" class="px-6 py-4">No accounts saved yet</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = accounts.map((account, index) => `
+                <tr class="border-b border-gray-700 bg-gray-800 hover:bg-gray-700">
+                    <td class="px-6 py-4">${index + 1}</td>
+                    <td class="px-6 py-4">${account.email}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center">
+                            <span class="password-field">${'•'.repeat(account.password.length)}</span>
+                            <button class="ml-2 text-netflix hover:text-netflixDark" onclick="togglePasswordVisibility(this, '${account.password}')">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">${account.phone || '-'}</td>
+                    <td class="px-6 py-4">${account.price ? 'Rp' + Number(account.price).toLocaleString('id-ID') : '-'}</td>
+                    <td class="px-6 py-4">${account.date}</td>
+                    <td class="px-6 py-4">
+                        <button class="text-red-600 hover:text-red-800" onclick="deleteAccount(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Toggle password visibility
+        function togglePasswordVisibility(button, password) {
+            const passwordField = button.parentElement.querySelector('.password-field');
+            
+            if (passwordField.textContent.includes('•')) {
+                passwordField.textContent = password;
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                passwordField.textContent = '•'.repeat(password.length);
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+
+        // Edit account
+        function editAccount(index) {
+            const accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            const account = accounts[index];
+            
+            // Fill form with account data
+            document.getElementById('email').value = account.email;
+            document.getElementById('password').value = account.password;
+            document.getElementById('phone').value = account.phone;
+            document.getElementById('price').value = account.price;
+            
+            // Update preview
+            updatePreview();
+            
+            // Set editing state
+            const form = document.getElementById('accountForm');
+            form.dataset.editingIndex = index;
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save mr-2"></i> Update Account';
+            
+            // Scroll to form
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Edit account
+        function editAccount(index) {
+            const accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            const account = accounts[index];
+            
+            // Fill form with account data
+            document.getElementById('email').value = account.email;
+            document.getElementById('password').value = account.password;
+            document.getElementById('phone').value = account.phone;
+            document.getElementById('price').value = account.price;
+            
+            // Update preview
+            updatePreview();
+            
+            // Set editing state
+            const form = document.getElementById('accountForm');
+            form.dataset.editingIndex = index;
+            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-save mr-2"></i> Update Account';
+            
+            // Scroll to form
+            form.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete account
+        function deleteAccount(index) {
+            let accounts = JSON.parse(localStorage.getItem('netflixAccounts')) || [];
+            accounts.splice(index, 1);
+            localStorage.setItem('netflixAccounts', JSON.stringify(accounts));
+            
+            // Refresh table
+            loadAccounts();
+        }
+    </script>
+</body>
+</html>
